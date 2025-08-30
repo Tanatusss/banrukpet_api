@@ -1,0 +1,93 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id               Int                @id @default(autoincrement())
+  name             String
+  email            String             @unique
+  password         String
+  phone            String
+  createdAt        DateTime           @default(now())
+  updateAt         DateTime           @updatedAt
+  role             Role               @default(USER)
+  pet              Pet[]
+  booking          Booking[]
+  appointmentcheck AppointmentCheck[]
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+model Pet {
+  id             Int              @id @default(autoincrement())
+  name           String
+  type           String
+  blood          String
+  breed          String
+  age            Int
+  gender         String?
+  user           User?            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId         Int?
+  bookingservice BookingService[]
+}
+
+model Booking {
+  id               Int                @id @default(autoincrement())
+  datenow          DateTime           @default(now())
+  date             String
+  time             String
+  status           Status             @default(PENDING)
+  User             User?              @relation(fields: [userId], references: [id])
+  userId           Int?
+  appointmentcheck AppointmentCheck[]
+  bookingservice   BookingService[]
+}
+
+enum Status {
+  PENDING
+  APPROVE
+  CANCELED
+}
+
+model BookingService {
+  id        Int      @id @default(autoincrement())
+  Pet       Pet?     @relation(fields: [petId], references: [id])
+  petId     Int?
+  Booking   Booking? @relation(fields: [bookingId], references: [id])
+  bookingId Int?
+  Service   Service? @relation(fields: [serviceId], references: [id])
+  serviceId Int?
+}
+
+model Service {
+  id             Int              @id @default(autoincrement())
+  name           String
+  description    String
+  bookingservice BookingService[]
+}
+
+model AppointmentCheck {
+  id        Int      @id @default(autoincrement())
+  User      User?    @relation(fields: [userId], references: [id])
+  userId    Int?
+  Booking   Booking? @relation(fields: [bookingId], references: [id])
+  bookingId Int?
+}
+
+model Contact {
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String
+  note      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
